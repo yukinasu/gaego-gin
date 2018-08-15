@@ -10,10 +10,10 @@ import (
 	"google.golang.org/appengine"
 )
 
-// HogeAPI manages api for Hoge
+// HogeAPI はHogeのAPIを管理する
 type HogeAPI struct{}
 
-// SetupHoge is
+// SetupHoge はHogeのAPIのハンドリングを行う
 func SetupHoge(rg *gin.RouterGroup) {
 	api := &HogeAPI{}
 

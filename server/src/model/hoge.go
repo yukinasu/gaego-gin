@@ -8,10 +8,10 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
-// HogeStore manages methods for manipulating Hoge
+// HogeStore はHogeを操作するメソッドをまとめる
 type HogeStore struct{}
 
-// Hoge is sample model
+// Hoge はサンプル用の構造体
 type Hoge struct {
 	ID        string    `json:"id" datastore:"-" goon:"id"`
 	Value     string    `json:"value"`
@@ -19,7 +19,7 @@ type Hoge struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// Load implements PropertyLoadSaver interface
+// Load はPropertyLoadSaverのインターフェースを実装する
 func (src *Hoge) Load(p []datastore.Property) error {
 	if err := datastore.LoadStruct(src, p); err != nil {
 		return err
@@ -28,7 +28,7 @@ func (src *Hoge) Load(p []datastore.Property) error {
 	return nil
 }
 
-// Save implements PropertyLoadSaver interface
+// Save はPropertyLoadSaverのインターフェースを実装する
 func (src *Hoge) Save() ([]datastore.Property, error) {
 	src.UpdatedAt = time.Now()
 
@@ -40,7 +40,7 @@ func (src *Hoge) Save() ([]datastore.Property, error) {
 	return p, nil
 }
 
-// Insert insert Hoge entity
+// Insert はHogeを新規登録する
 func (src *Hoge) Insert(g *goon.Goon) error {
 	if src.ID == "" {
 		return errors.New("id is required")
@@ -62,7 +62,7 @@ func (src *Hoge) Insert(g *goon.Goon) error {
 	return src.put(g, nil)
 }
 
-// Update update Hoge entity
+// Update はHogeを更新する
 func (src *Hoge) Update(g *goon.Goon) error {
 	if src.ID == "" {
 		return errors.New("id is required")
@@ -92,7 +92,7 @@ func (src *Hoge) put(g *goon.Goon, old *Hoge) error {
 	return nil
 }
 
-// Get get Hoge entity
+// Get はHogeを1件取得する
 func (store *HogeStore) Get(g *goon.Goon, id string) (*Hoge, error) {
 	if id == "" {
 		return nil, errors.New("id is required")
@@ -108,7 +108,7 @@ func (store *HogeStore) Get(g *goon.Goon, id string) (*Hoge, error) {
 	return hoge, nil
 }
 
-// Delete delete Hoge entity
+// Delete はHogeを削除する
 func (store *HogeStore) Delete(g *goon.Goon, id string) error {
 	if id == "" {
 		return errors.New("id is required")
