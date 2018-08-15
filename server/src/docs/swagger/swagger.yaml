@@ -1,0 +1,144 @@
+basePath: /api
+definitions:
+  model.Hoge:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      updatedAt:
+        type: string
+      value:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Sample API
+  license:
+    name: MIT
+  title: GAE/Go-Gin Sample API
+  version: "1.0"
+paths:
+  /hoge:
+    post:
+      consumes:
+      - application/json
+      description: Hogeを新規作成する
+      parameters:
+      - description: 新規作成するHoge
+        in: body
+        name: hoge
+        required: true
+        schema:
+          $ref: '#/definitions/model.Hoge'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Hoge'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Hoge 新規作成
+      tags:
+      - Hoge
+  /hoge/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Hogeを削除する
+      parameters:
+      - description: Hoge.ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: "null"
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Hoge 削除
+      tags:
+      - Hoge
+    get:
+      consumes:
+      - application/json
+      description: Hogeを1件取得する
+      parameters:
+      - description: Hoge.ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Hoge'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Hoge 1件取得
+      tags:
+      - Hoge
+    put:
+      consumes:
+      - application/json
+      description: Hogeを更新する
+      parameters:
+      - description: 更新するHoge
+        in: body
+        name: hoge
+        required: true
+        schema:
+          $ref: '#/definitions/model.Hoge'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Hoge'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Hoge 更新
+      tags:
+      - Hoge
+swagger: "2.0"

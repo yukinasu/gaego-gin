@@ -1,0 +1,6 @@
+### Vendor ###
+server/vendor/
+
+### IDE ###
+.idea/
+
