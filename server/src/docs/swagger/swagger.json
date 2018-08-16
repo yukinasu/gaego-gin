@@ -13,6 +13,54 @@
     "basePath": "/api",
     "paths": {
         "/hoge": {
+            "get": {
+                "description": "Hogeの一覧を取得する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hoge"
+                ],
+                "summary": "Hoge 一覧取得",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "start cursor",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "query limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.HogeListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Hogeを新規作成する",
                 "consumes": [
@@ -209,6 +257,20 @@
                 },
                 "value": {
                     "type": "string"
+                }
+            }
+        },
+        "model.HogeListResp": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "string"
+                },
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Hoge"
+                    }
                 }
             }
         }

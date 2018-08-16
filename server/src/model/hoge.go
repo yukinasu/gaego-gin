@@ -108,6 +108,82 @@ func (store *HogeStore) Get(g *goon.Goon, id string) (*Hoge, error) {
 	return hoge, nil
 }
 
+// HogeListResp はHoge一覧取得のレスポンス
+type HogeListResp struct {
+	List   []*Hoge `json:"list"`
+	Cursor string  `json:"cursor"`
+}
+
+// List はHogeの一覧を取得する
+func (store *HogeStore) List(g *goon.Goon, cursor string, limit int) (*HogeListResp, error) {
+	q := datastore.NewQuery(g.Kind(Hoge{})).KeysOnly()
+
+	if limit == 0 {
+		limit = 10
+	}
+	if limit != -1 {
+		// 次の1件が存在するかを確認するため、1件多く取得する
+		q = q.Limit(limit + 1)
+	}
+
+	if cursor != "" {
+		start, err := datastore.DecodeCursor(cursor)
+		if err != nil {
+			return nil, err
+		}
+
+		q = q.Start(start)
+	}
+
+	it := g.Run(q)
+
+	count := 0
+	hasNext := false
+	var cur datastore.Cursor
+	list := make([]*Hoge, 0, limit)
+
+	for {
+		key, err := it.Next(nil)
+		if err != nil {
+			if err == datastore.Done {
+				break
+			}
+
+			return nil, err
+		}
+
+		count++
+		if limit != -1 && limit < count {
+			hasNext = true
+			break
+		}
+
+		list = append(list, &Hoge{ID: key.StringID()})
+
+		// limitで指定した件数に到達したところでCursorを保存
+		if limit == count {
+			cur, err = it.Cursor()
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if err := g.GetMulti(list); err != nil {
+		return nil, err
+	}
+
+	resp := &HogeListResp{
+		List: list,
+	}
+
+	if hasNext {
+		resp.Cursor = cur.String()
+	}
+
+	return resp, nil
+}
+
 // Delete はHogeを削除する
 func (store *HogeStore) Delete(g *goon.Goon, id string) error {
 	if id == "" {

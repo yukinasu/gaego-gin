@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gaego-gin/server/src/model"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjibson/goon"
@@ -18,6 +19,7 @@ func SetupHoge(rg *gin.RouterGroup) {
 	api := &HogeAPI{}
 
 	rg.GET("/hoge/:id", api.Get)
+	rg.GET("/hoge", api.List)
 	rg.POST("/hoge", api.Insert)
 	rg.PUT("/hoge/:id", api.Update)
 	rg.DELETE("/hoge/:id", api.Delete)
@@ -52,6 +54,44 @@ func (api *HogeAPI) Get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, hoge)
+}
+
+// List はHogeの一覧を取得する
+// @Description Hogeの一覧を取得する
+// @Tags Hoge
+// @Summary Hoge 一覧取得
+// @Accept  json
+// @Produce  json
+// @Param  cursor query string false "start cursor"
+// @Param  limit query string false "query limit"
+// @Success 200 {object} model.HogeListResp
+// @Failure 400 {string} string
+// @Failure 500 {string} string
+// @Router /hoge [get]
+func (api *HogeAPI) List(c *gin.Context) {
+	cursor := c.Query("cursor")
+
+	limit := 0
+	if c.Query("limit") != "" {
+		var err error
+		limit, err = strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
+	ctx := appengine.NewContext(c.Request)
+	g := goon.FromContext(ctx)
+
+	store := &model.HogeStore{}
+	resp, err := store.List(g, cursor, limit)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // Insert はHogeを新規作成する

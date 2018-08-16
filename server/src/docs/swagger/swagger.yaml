@@ -11,6 +11,15 @@ definitions:
       value:
         type: string
     type: object
+  model.HogeListResp:
+    properties:
+      cursor:
+        type: string
+      list:
+        items:
+          $ref: '#/definitions/model.Hoge'
+        type: array
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -21,6 +30,38 @@ info:
   version: "1.0"
 paths:
   /hoge:
+    get:
+      consumes:
+      - application/json
+      description: Hogeの一覧を取得する
+      parameters:
+      - description: start cursor
+        in: query
+        name: cursor
+        type: string
+      - description: query limit
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HogeListResp'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Hoge 一覧取得
+      tags:
+      - Hoge
     post:
       consumes:
       - application/json
