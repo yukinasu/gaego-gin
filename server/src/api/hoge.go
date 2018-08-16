@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"gaego-gin/server/src/model"
 	"net/http"
 	"strconv"
@@ -9,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mjibson/goon"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 )
 
 // HogeAPI はHogeのAPIを管理する
@@ -49,6 +49,11 @@ func (api *HogeAPI) Get(c *gin.Context) {
 	store := &model.HogeStore{}
 	hoge, err := store.Get(g, id)
 	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			c.String(http.StatusNotFound, err.Error())
+			return
+		}
+
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -107,13 +112,13 @@ func (api *HogeAPI) List(c *gin.Context) {
 // @Router /hoge [post]
 func (api *HogeAPI) Insert(c *gin.Context) {
 	hoge := &model.Hoge{}
-	if err := c.Bind(hoge); err != nil {
+	if err := c.BindJSON(hoge); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if hoge.ID == "" {
-		c.JSON(http.StatusBadRequest, errors.New("id is required"))
+		c.String(http.StatusBadRequest, "id is required")
 		return
 	}
 
@@ -137,12 +142,13 @@ func (api *HogeAPI) Insert(c *gin.Context) {
 // @Param  hoge body model.Hoge true "更新するHoge"
 // @Success 200 {object} model.Hoge
 // @Failure 400 {string} string
+// @Failure 404 {string} string
 // @Failure 500 {string} string
 // @Router /hoge/{id} [put]
 func (api *HogeAPI) Update(c *gin.Context) {
 	hoge := &model.Hoge{}
-	if err := c.Bind(hoge); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+	if err := c.BindJSON(hoge); err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -155,6 +161,11 @@ func (api *HogeAPI) Update(c *gin.Context) {
 	g := goon.FromContext(ctx)
 
 	if err := hoge.Update(g); err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			c.String(http.StatusNotFound, err.Error())
+			return
+		}
+
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
