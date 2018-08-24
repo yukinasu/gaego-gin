@@ -125,7 +125,12 @@ func (api *HogeAPI) Insert(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 	g := goon.FromContext(ctx)
 
-	if err := hoge.Insert(g); err != nil {
+	if err := g.RunInTransaction(func(tg *goon.Goon) error {
+		hoge := hoge
+
+		return hoge.Insert(tg)
+
+	}, &datastore.TransactionOptions{XG: true}); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -160,13 +165,24 @@ func (api *HogeAPI) Update(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 	g := goon.FromContext(ctx)
 
-	if err := hoge.Update(g); err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			c.String(http.StatusNotFound, err.Error())
-			return
+	statusCode := 0
+	if err := g.RunInTransaction(func(tg *goon.Goon) error {
+		hoge := hoge
+
+		if err := hoge.Update(tg); err != nil {
+			if err == datastore.ErrNoSuchEntity {
+				statusCode = http.StatusNotFound
+				return err
+			}
+
+			statusCode = http.StatusInternalServerError
+			return err
 		}
 
-		c.String(http.StatusInternalServerError, err.Error())
+		return nil
+
+	}, &datastore.TransactionOptions{XG: true}); err != nil {
+		c.String(statusCode, err.Error())
 		return
 	}
 
@@ -195,7 +211,11 @@ func (api *HogeAPI) Delete(c *gin.Context) {
 	g := goon.FromContext(ctx)
 
 	store := &model.HogeStore{}
-	if err := store.Delete(g, id); err != nil {
+
+	if err := g.RunInTransaction(func(tg *goon.Goon) error {
+		return store.Delete(tg, id)
+
+	}, &datastore.TransactionOptions{XG: true}); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
